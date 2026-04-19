@@ -1,14 +1,27 @@
+import ChartRenderer from './ChartRenderer';
+import DiagramRenderer from './DiagramRenderer';
+
 export default function PassagePanel({ content }) {
-  if (!content || !content.textPayload) return null;
+  if (!content) return null;
+  const hasText = !!content.textPayload;
+  const hasChart = !!content.chart;
+  const hasDiagram = !!content.diagram;
+  if (!hasText && !hasChart && !hasDiagram) return null;
 
   return (
-    <div className="h-full overflow-y-auto p-4 bg-white border-r border-gray-300">
-      <div className="text-xs text-gray-500 mb-2 font-semibold uppercase tracking-wide">
+    <div className="h-full overflow-y-auto p-4 bg-white border-r border-slate-200 space-y-4">
+      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
         Reading Passage / Data Set
       </div>
-      <div className="text-sm leading-relaxed text-gray-800 whitespace-pre-line">
-        {content.textPayload}
-      </div>
+
+      {hasText && (
+        <div className="text-sm leading-relaxed text-slate-800 whitespace-pre-line">
+          {content.textPayload}
+        </div>
+      )}
+
+      {hasChart && <ChartRenderer chart={content.chart} />}
+      {hasDiagram && <DiagramRenderer diagram={content.diagram} />}
     </div>
   );
 }

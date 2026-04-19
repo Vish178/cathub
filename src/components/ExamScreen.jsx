@@ -27,7 +27,8 @@ export default function ExamScreen() {
   }, [currentSection]);
 
   const currentQuestion = questions[currentQuestionIndex];
-  const hasPassage = currentQuestion?.parentContent?.textPayload;
+  const pc = currentQuestion?.parentContent;
+  const hasPassage = !!(pc?.textPayload || pc?.chart || pc?.diagram);
 
   const handleSubmit = () => {
     setShowSubmitModal(true);

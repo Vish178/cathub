@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { navigateTo, setExamConfig } from '../store/navigationSlice';
+import { navigateTo, setExamConfig, setQuantCategory } from '../store/navigationSlice';
 import { configureExam } from '../store/examSessionSlice';
 import { getAllMockTests, getMocksByEra, getPoolStats } from '../data/index';
+import { QUANT_CATEGORIES } from '../data/quantTopics';
+import { getTopicStats } from '../data/topicPool';
 
 const SECTIONS_META = {
   VARC: { name: 'VARC', full: 'Verbal Ability & Reading Comprehension', icon: '📖', color: 'cyan' },
@@ -61,6 +63,7 @@ export default function Dashboard() {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
             <a href="#mocks" className="hover:text-white transition-colors">Mocks</a>
             <a href="#sections" className="hover:text-white transition-colors">Sections</a>
+            <a href="#quant" className="hover:text-white transition-colors">Quant</a>
             <a href="#pool" className="hover:text-white transition-colors">Pool</a>
           </div>
           <button
@@ -232,6 +235,65 @@ export default function Dashboard() {
 
                   <div className={`mt-6 inline-flex items-center gap-1.5 text-sm font-bold ${colorClasses.text} group-hover:gap-2.5 transition-all`}>
                     Start {sec.name} Test →
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════ QUANT TOPICS ══════ */}
+      <section id="quant" className="py-20 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="mb-10 max-w-2xl">
+            <div className="text-xs font-bold text-amber-400 uppercase tracking-[0.2em] mb-2">Topic Mastery</div>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tight">Quant — Topic Practice.</h2>
+            <p className="text-base text-slate-400 mt-3">
+              Drill specific topics. Pick a category, choose a topic, get focused practice.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {Object.values(QUANT_CATEGORIES).map((cat) => {
+              const colorClasses = {
+                blue: { bg: 'bg-blue-600', text: 'text-blue-400', hover: 'hover:border-blue-500', light: 'bg-blue-500/10' },
+                purple: { bg: 'bg-purple-600', text: 'text-purple-400', hover: 'hover:border-purple-500', light: 'bg-purple-500/10' },
+                emerald: { bg: 'bg-emerald-600', text: 'text-emerald-400', hover: 'hover:border-emerald-500', light: 'bg-emerald-500/10' },
+                amber: { bg: 'bg-amber-600', text: 'text-amber-400', hover: 'hover:border-amber-500', light: 'bg-amber-500/10' },
+                rose: { bg: 'bg-rose-600', text: 'text-rose-400', hover: 'hover:border-rose-500', light: 'bg-rose-500/10' },
+              }[cat.color];
+              const topicList = Object.values(cat.topics);
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => { dispatch(setQuantCategory(cat.id)); dispatch(navigateTo('quant')); }}
+                  className={`group text-left p-6 rounded-2xl bg-slate-900 border border-slate-800 ${colorClasses.hover} hover:bg-slate-800 transition-all cursor-pointer`}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-12 h-12 rounded-xl ${colorClasses.bg} flex items-center justify-center text-xl font-black shadow-lg`}>
+                      {cat.icon}
+                    </div>
+                    <div>
+                      <div className={`font-black text-lg ${colorClasses.text}`}>{cat.title}</div>
+                      <div className="text-xs text-slate-500">{cat.subtitle}</div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-400 mb-4 leading-relaxed">{cat.description}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {topicList.slice(0, 5).map((t) => (
+                      <span key={t.id} className={`text-[10px] px-2 py-1 rounded-md ${colorClasses.light} ${colorClasses.text} font-semibold border border-slate-800`}>
+                        {t.title}
+                      </span>
+                    ))}
+                    {topicList.length > 5 && (
+                      <span className="text-[10px] px-2 py-1 rounded-md bg-slate-800 text-slate-400 font-semibold">
+                        +{topicList.length - 5} more
+                      </span>
+                    )}
+                  </div>
+                  <div className={`mt-4 inline-flex items-center gap-1 text-xs font-bold ${colorClasses.text} group-hover:gap-2 transition-all`}>
+                    {topicList.length} topics →
                   </div>
                 </button>
               );
