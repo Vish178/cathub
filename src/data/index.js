@@ -5,6 +5,7 @@ import {
   getPoolStats,
   TOTAL_VIRTUAL_MOCKS,
 } from './mockGenerator';
+import { getAllDILRChartQuestions } from './dilrChartsBank';
 
 // Primary API — "mock-1" through "mock-50" (or vmock-*)
 export function getMockTest(mockId) {
@@ -37,27 +38,49 @@ export function getMocksByEra() {
   };
 }
 
+// Cache DILR charts bank questions once
+let _dilrChartsQuestions = null;
+function getDILRChartsQuestions() {
+  if (_dilrChartsQuestions) return _dilrChartsQuestions;
+  try {
+    _dilrChartsQuestions = getAllDILRChartQuestions();
+  } catch (e) {
+    _dilrChartsQuestions = [];
+  }
+  return _dilrChartsQuestions;
+}
+
 export function getQuestionsForMock(mockId, section) {
   const num = parseMockNumber(mockId);
+
+  // DILR section uses the dedicated charts bank (CAT format: 5 sets, 22 Qs, real charts).
+  // If it's available (22 questions), use it for the first mock; otherwise fall back.
+  if (section === 'DILR') {
+    const chartsQs = getDILRChartsQuestions();
+    if (chartsQs.length >= 22) return chartsQs;
+  }
+
   return getVirtualMockQuestions(num, section);
 }
 
 export function getAllPracticeQuestions(section) {
-  // Pool ALL questions for practice mode
-  const mock = getVirtualMock(1);
-  // Practice uses the raw pool, not a mock sample — get the full combined list
-  const all = [];
-  for (let n = 1; n <= 9; n++) {
-    // pull from multiple seeds to aggregate all pool questions
-  }
-  // Simpler: use getPoolStats infrastructure — return combined pool
   return combinePoolForPractice(section);
 }
 
 function combinePoolForPractice(section) {
-  // Use several virtual mocks and deduplicate by question id
   const seen = new Set();
   const result = [];
+
+  // Include DILR charts bank questions first (they have visual context)
+  if (section === 'DILR') {
+    getDILRChartsQuestions().forEach(q => {
+      if (!seen.has(q.id)) {
+        seen.add(q.id);
+        result.push(q);
+      }
+    });
+  }
+
   for (let n = 1; n <= 20; n++) {
     const qs = getVirtualMockQuestions(n, section);
     qs.forEach(q => {
